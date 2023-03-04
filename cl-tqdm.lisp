@@ -154,4 +154,5 @@ Example:
       ; delete the current progress-bar
       (backward-lines)
       (fresh-line))
-  (format stream (render tqdm)))
+  (format stream (render tqdm))
+  nil)

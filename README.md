@@ -21,9 +21,9 @@ Coming soon... (I've not registered it in quicklisp yet...)
 
 ## Features
 
-The basic usage is that, initialize `tqdmbar` structure with `(with-tqdm)` macro and call `(update)` function.
+The basic usage is that: initialize `tqdmbar` structure with `(with-tqdm)` macro and then, call `(update)` function to increate the bar.
 
-tqdmbar structure can be initialized with `(tqdm count)` constructor.
+`tqdmbar` structure can be initialized with `(tqdm count)` constructor.
 
 ```lisp
 (with-tqdm x 100 "No info"
@@ -37,7 +37,7 @@ tqdmbar structure can be initialized with `(tqdm count)` constructor.
 
 If you don't want to use animated progress-bar in specific environment, `(with-config)` macro is available to solve this problem.
 
-This will enable to use cl-tqdm in SLIME REPL! ٩(๑>∀<๑)۶
+This will make it possible to use cl-tqdm in SLIME REPL! ٩(๑>∀<๑)۶
 
 ```lisp
 (with-config (config :animation nil)

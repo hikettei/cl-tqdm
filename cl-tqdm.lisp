@@ -158,10 +158,12 @@ Example:
 				1.0))
 			 'single-float))
 	   (total (tqdm-total-count status))
-	   (ts (tqdm-call-timestamps status)))
-      
-      (setf (tqdm-call-timestamps status) `(,(car ts)
-					    ,(second ts)))
+	   (ts (tqdm-call-timestamps status))
+	   (average-sec (/ average-sec (if (= 0.0 (car ts))
+					   1.0
+					   (car ts)))))
+      (setf (tqdm-call-timestamps status) `(,0
+					    ,average-sec)) ;decay rate?
       (write-string (write-to-string (* average-sec total)) bar)
       (write-string "s, " bar)
       (write-string (write-to-string average-sec) bar)

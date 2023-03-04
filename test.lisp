@@ -17,6 +17,8 @@
     (sleep 0.001)
     (update x :description (format nil "Loss:~a.011" (random 10)))))
 
-(format t "~%~%🗒In the near future, to line up several progress-bars will be implemented...~%")
+(fresh-line)
+
+(format t "~%~%🗒 In the near future, to line up several progress-bars will be implemented...~%")
 (format t "~%🗒 More and documentations will be added!~%")
 (format t "~%✅ Pull requests are welcome at original repository!~%")

@@ -1,6 +1,6 @@
 (in-package #:cl-user)
 
-(asdf:defsystem :cl-cram
+(asdf:defsystem :cl-tqdm
   :name "cl-tqdm"
   :description "Simple And Fast Progress Bar Library for Common Lisp"
   :author "hikettei"

@@ -15,7 +15,6 @@
 	    (:print-function
 	     (lambda (tqdm stream depth)
 	       (declare (ignore depth))
-	       (render-progress-bar stream tqdm)
 	       (format stream "Tqdm([~a/~a]~%:identifier :~a~%:description \"~a\"~%:creation-time ~a)~%"
 		       (tqdm-count-idx tqdm)
 		       (tqdm-total-count tqdm)
@@ -51,14 +50,18 @@ Example:
 	    (:print-function
 	     (lambda (config stream depth)
 	       (declare (ignore depth))
-	       (format stream "TqdmConfig{~%  :animation ~a ~%}"
+	       (format stream "TqdmConfig{~% :animation ~a ~%}"
 		       (config-animation config))))
 	    (:constructor
 		config (&key
 			  (animation t)
-			  (space-string " "))))
+			  (space-string " ")
+			  (bar-string "█")
+			  (indent 0))))
   (animation t :type boolean)
-  (space-string " " :type string))
+  (space-string " " :type string)
+  (bar-string "█" :type string)
+  (indent 0 :type fixnum))
 
 (defvar *tqdm-config* (config
 		       :animation t
@@ -102,6 +105,36 @@ Example:
 	(tqdm-call-timestamps tqdm))				       
   (print-object tqdm stream)
   nil)
+
+(defun progress-percent (status)
+  (fround (* 100 (/ (tqdm-count-idx status) (tqdm-total-count status)))))
+
+(declaim (ftype (function (tqdmbar) string) render))
+(defun render (status)
+  (declare ;(optimize (speed 3))
+	   (type tqdmbar status))
+  (with-output-to-string (bar)
+    (let ((spl (- (config-indent *tqdm-config*) (length (tqdm-description status)) -1)))
+      (write-string (tqdm-description status) bar)
+      (dotimes (_ spl) (write-string " " bar))
+      (write-string ":" bar))
+    (let* ((n (round (progress-percent status)))
+	   (r (round (if (>= (/ n 10) 10) 10 (/ n 10)))))
+      (if (< n 100)
+	  (write-string " " bar))
+      (write-string (write-to-string n) bar)
+      (write-string "% |" bar)
+      (dotimes (_ r) (write-string (config-bar-string *tqdm-config*) bar))
+      (dotimes (_ (- 10 r)) (write-string (config-space-string *tqdm-config*) bar)))
+    (write-string "| " bar)
+    (write-string (write-to-string (tqdm-count-idx status)) bar)
+    (write-string "/" bar)
+    (write-string (write-to-string (tqdm-total-count status)) bar)
+    (write-string " [" bar)
+    (let* ((now-time (get-universal-time))
+	   (dif (- now-time (tqdm-creation-time status))))
+      (write-string (write-to-string dif) bar)
+      (write-string "s] " bar))))
 
 (defun render-progress-bar (stream tqdm)
   (declare (optimize (speed 3))

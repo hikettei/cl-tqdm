@@ -33,6 +33,12 @@ Pull Requests are welcome at original repository [Here](https://github.com/hiket
 
 This package is under MIT Licence. See `./LICENCE`
 
+# Workloads
+
+- Fix: Estimating of resting time.
+- Todo: Optimize the whole codes
+- Todo: Prepare Example Code and Documentations
+
 # Author
 
 hikettei (Twitter: [@ichndm](https://twitter.com/ichndm))

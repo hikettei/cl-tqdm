@@ -15,14 +15,8 @@
 	    (:print-function
 	     (lambda (tqdm stream depth)
 	       (declare (ignore depth))
-	       (format stream "Tqdm([~a/~a]~%:identifier :~a~%:description \"~a\"~%:creation-time ~a)~%"
-		       (tqdm-count-idx tqdm)
-		       (tqdm-total-count tqdm)
-		       (tqdm-identifier tqdm)
-		       (or (unless (equal "" (tqdm-description tqdm))
-			     (tqdm-description tqdm))
-			   "No Descriptions.")
-		       (tqdm-creation-time tqdm))))
+	       (update tqdm :incf 0 :stream stream)
+	       nil))
 	    (:constructor
 		tqdm (identifier
 		      total-count
@@ -50,8 +44,11 @@ Example:
 	    (:print-function
 	     (lambda (config stream depth)
 	       (declare (ignore depth))
-	       (format stream "TqdmConfig{~% :animation ~a ~%}"
-		       (config-animation config))))
+	       (format stream "TqdmConfig{~% :animation ~a ~% :space-string ~a~% :bar-string ~a :indent ~a~%}"
+		       (config-animation config)
+		       (config-space-string config)
+		       (config-bar-string config)
+		       (config-indent config))))
 	    (:constructor
 		config (&key
 			  (animation t)
@@ -63,9 +60,11 @@ Example:
   (bar-string "█" :type string)
   (indent 0 :type fixnum))
 
-(defvar *tqdm-config* (config
-		       :animation t
-		       :space-string " "))
+(defparameter *tqdm-config* (config
+			     :animation t
+			     :space-string " "))
+
+(defparameter *in-update-method* nil)
 
 (defmacro with-tqdm (out
 		     identifier
@@ -80,6 +79,7 @@ Example:
 	   (type fixnum total-size)
 	   (type string description))
   `(let ((,out (tqdm ,identifier ,total-size ,description)))
+     (fresh-line)
      ,@body))
 
 (defmacro with-config (config &body body)
@@ -91,35 +91,39 @@ Example:
   `(let ((*tqdm-config* ,config))
      ,@body))
 
-(defun update (tqdm count-incf &key (description "") (stream t))
+(defun update (tqdm &key (incf 1) (description "") (stream t))
   (declare (optimize (speed 3))
 	   (type symbol identifier)
-	   (type fixnum count-incf)
+	   (type fixnum incf)
 	   (type tqdmbar tqdm))
-  (incf (tqdm-count-idx tqdm) count-incf)
+  (incf (tqdm-count-idx tqdm) incf)
   (setf (tqdm-description tqdm) description)
   (push (- (or
 	    (the (or null (integer 0 4611686018427387903)) (car (last (tqdm-call-timestamps tqdm))))
 	    (tqdm-creation-time tqdm))
 	   (the (integer 0 4611686018427387903) (get-universal-time)))
-	(tqdm-call-timestamps tqdm))				       
-  (print-object tqdm stream)
-  nil)
+	(tqdm-call-timestamps tqdm))
+  (let ((*in-update-method* t))
+    (render-progress-bar stream tqdm)
+    nil))
 
 (defun progress-percent (status)
   (fround (* 100 (/ (tqdm-count-idx status) (tqdm-total-count status)))))
 
 (declaim (ftype (function (tqdmbar) string) render))
 (defun render (status)
+  "Rendering given status (which is the structure of tqdmbar), render returns the output string."
   (declare ;(optimize (speed 3))
 	   (type tqdmbar status))
   (with-output-to-string (bar)
     (let ((spl (- (config-indent *tqdm-config*) (length (tqdm-description status)) -1)))
       (write-string (tqdm-description status) bar)
       (dotimes (_ spl) (write-string " " bar))
-      (write-string ":" bar))
-    (let* ((n (round (progress-percent status)))
-	   (r (round (if (>= (/ n 10) 10) 10 (/ n 10)))))
+      (unless (equal (tqdm-description status) "")
+	(write-string ":" bar)
+	(write-string " " bar)))
+    (let* ((n (the fixnum (round (the single-float (progress-percent status)))))
+	   (r (round (if (>= (/ n 10) 10.0) 10 (/ n 10)))))
       (if (< n 100)
 	  (write-string " " bar))
       (write-string (write-to-string n) bar)
@@ -136,8 +140,18 @@ Example:
       (write-string (write-to-string dif) bar)
       (write-string "s] " bar))))
 
+(defun backward-lines ()
+  (write-char #\Return)
+  (write-char #\Rubout))
+
 (defun render-progress-bar (stream tqdm)
-  (declare (optimize (speed 3))
+  (declare ;(optimize (speed 3))
 	   (type TqdmBar tqdm))
 
-  )
+  (if (and
+       (config-animation *tqdm-config*)
+       *in-update-method*)
+      ; delete the current progress-bar
+      (backward-lines)
+      (fresh-line))
+  (format stream (render tqdm)))

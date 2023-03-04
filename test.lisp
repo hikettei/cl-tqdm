@@ -1,11 +1,14 @@
 
-(load "cl-tqdm.asd")
+(in-package :cl-user)
 
-(ql:quickload :cl-tqdm)
+(load "cl-tqdm.lisp")
+
+(use-package :cl-tqdm)
 
 (defpackage :cl-tqdm/test
   (:use :cl :cl-tqdm))
 
-(with-tqdm :bar1 100
-  (dotimes (i 100)
-    (update :bar1 1 "A")))
+(with-tqdm x :bar1 10000 ""
+  (dotimes (i 10000)
+    (sleep 0.01)
+    (update x)))

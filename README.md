@@ -5,7 +5,7 @@ Simple and Fast Progress Bar Library for Common Lisp, inspired in tqdm.
 
 ![demo](https://gyazo.com/5bbc43310df9281c4711446ac7bb23b3/raw)
 
-(Currently estimation of remaining time does not work well lol.)
+(Currently estimation of remaining time does not work well lol. Pull requests are welcome I got tired.)
 
 This is the reimplementation of my old library [cl-cram](https://github.com/hikettei/cl-cram) because its APIs aren't useful and there is room to optimize.
 

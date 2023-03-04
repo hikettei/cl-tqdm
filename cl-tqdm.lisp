@@ -5,6 +5,7 @@
    #:tqdm
    #:config
    #:with-config
+   #:with-no-animation
    #:with-tqdm
    #:update))
 

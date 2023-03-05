@@ -74,6 +74,7 @@ This package is under MIT Licence. See `./LICENCE`
 - Fix: Estimating of resting time.
 - Todo: Optimize the whole codes
 - Todo: Prepare Example Code and Documentations
+- To Support: Jupyter
 
 # Author
 

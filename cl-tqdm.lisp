@@ -75,7 +75,7 @@ Example:
   "Example:
 (with-tqdm x :ProgressBar1 100 \"\"
   (update x))"
-  (declare (type fixnum total-size)
+  (declare (type (or (unsigned-byte 64) symbol) total-size)
 	   (type string description))
   `(let ((,out (tqdm ,total-size :with-tqdm ,description)))
      (fresh-line)

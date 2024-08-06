@@ -1,5 +1,6 @@
 # cl-tqdm
-Simple and Fast Progress Bar Library for Common Lisp, inspired in tqdm.
+
+A tiny progress bar library, customize as you like to suit your project.
 
 (Optimizing hasn't done yet.)
 
